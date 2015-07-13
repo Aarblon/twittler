@@ -1,27 +1,80 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8">
+    <title>Twittler</title>
+    <link rel="stylesheet" type="text/css" href="normalize.css">
+    <link rel="stylesheet" href="styles.css" />
     <script src="jquery.js"></script>
     <script src="data_generator.js"></script>
+    <!-- timeago.js is a jQuery plugin used for creating fuzzy timestamps -->
+    <script src="timeago.js"></script>
   </head>
+  
   <body>
+
+    <div class="banner">
+      <header>Twittler</header>
+      <p>Welcome to the future of expressing your thoughts in ridiculously short messages!</p>
+    </div>
+    
+    <div class="background"></div>
+
+    <section class="tweetbody">
+      <div class="newMessages">
+        <h4><button>Load All Tweets</button></h4>
+
+      </div>
+    </section> 
+
     <script>
-
       $(document).ready(function(){
-        var $body = $('body');
-        $body.html('');
+        //Sets up the jQuery plugin for fuzzy timestamp conversion
+        jQuery("abbr.timeago").timeago();
 
-        var index = streams.home.length - 1;
-        while(index >= 0){
-          var tweet = streams.home[index];
-          var $tweet = $('<div></div>');
-          $tweet.text('@' + tweet.user + ': ' + tweet.message);
-          $tweet.appendTo($body);
-          index -= 1;
-        }
+        //function to clear tweets
+        var clear = function () {
+          $('.tweets').remove();
+        };
+
+        var $body = $('.tweetbody');
+        $body.html();
+
+        //button to populate page with all tweets
+        $('.newMessages').on('click', function() {
+          clear();
+          var tweetCount = $('.tweets').length;    
+          if($('.tweets').length < streams.home.length) {
+            var index = streams.home.length - 1;
+            while(index >= tweetCount){     
+              var tweet = streams.home[index];
+              var time = jQuery.timeago(tweet.created_at);
+              var $tweet = $('<p class="tweets">@<span class="user">' + tweet.user + '</span>: ' + tweet.message + '<span class="timestamp">  ' + time + '</span></p>');
+              $tweet.appendTo($body);
+              index -= 1;
+            }
+          }
+
+          //click on username to only display tweets from that user
+          $('.user').on('click', function(){
+            clear();
+            var name = $(this).text();
+            var index = streams.users[name].length - 1;
+            while(index >= 0) {
+              var tweet = streams.users[name][index];
+              var time = jQuery.timeago(tweet.created_at);
+              var $tweet = $('<p class="tweets">@<span class="user">' + name + '</span>: ' + tweet.message + '<span class="timestamp">  ' + time + '</span></p>');
+              $tweet.appendTo($body);
+              index -= 1;
+            }
+
+          });
+
+        });
 
       });
 
     </script>
+
   </body>
 </html>
